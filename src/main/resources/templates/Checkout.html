@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{base}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - Spectacle</title>
+  <th:block layout:fragment="styles">
+    <link rel="stylesheet" th:href="@{/css/products.css}" />
+  </th:block>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <main class="container my-5">
+      <div class="row">
+        <!-- Checkout form & address selection -->
+        <div class="col-md-8">
+          <h4 class="mb-3"><b>Delivery Address</b></h4>
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+          <form th:action="@{/checkout}" method="post" id="checkoutForm">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div th:if="${addresses.size() > 0}">
+              <div class="mb-3">
+                <p>Select one of your saved addresses:</p>
+                <div th:each="addr : ${addresses}" class="form-check">
+                  <input class="form-check-input" type="radio" name="addressId" th:value="${addr.id}" id="addr-[[${addr.id}]]" />
+                  <label class="form-check-label" th:for="${'addr-' + addr.id}">
+                    <span th:text="${addr.fullAddress}"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <hr />
+            <div>
+              <h5>Add a new address</h5>
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <label class="form-label">Name</label>
+                  <input type="text" name="name" class="form-control" th:value="${newAddress.name}" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Area / Street</label>
+                  <input type="text" name="area" class="form-control" th:value="${newAddress.area}" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">City</label>
+                  <input type="text" name="city" class="form-control" th:value="${newAddress.city}" />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">State</label>
+                  <input type="text" name="state" class="form-control" th:value="${newAddress.state}" />
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Pincode</label>
+                  <input type="number" name="pincode" class="form-control" th:value="${newAddress.pincode}" />
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <h4 class="mb-3">Payment</h4>
+
+            <div class="my-3">
+              <div class="form-check">
+                <input id="upi" name="paymentMethod" type="radio" class="form-check-input" checked required />
+                <label class="form-check-label" for="upi">Cash on Delivery</label>
+              </div>
+            </div>
+
+            <!-- <div class="row gy-3">
+              <div class="col-md-12">
+                <label for="upi-app" class="form-label">Select UPI App</label>
+                <select class="form-select" id="upi-app">
+                  <option value="upi">Generic UPI (Any App)</option>
+                  <option value="tez">Google Pay</option>
+                  <option value="phonepe">PhonePe</option>
+                  <option value="paytmmp">Paytm</option>
+                </select>
+                <small class="text-muted">You will be redirected to the selected app to complete the payment.</small>
+              </div>
+            </div> -->
+
+            <hr class="my-4" />
+
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Place Order</button>
+          </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-md-4">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-primary" style="color: #f39c9c !important">Your cart</span>
+            <span class="badge bg-primary rounded-pill" style="background-color: #f39c9c !important" th:text="${cartItems.size()}">0</span>
+          </h4>
+          <ul class="list-group mb-3">
+            <li class="list-group-item" th:each="item : ${cartItems}">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <h6 class="my-0" th:text="${item.product.name}"></h6>
+                  <small class="text-muted" th:text="${item.product.category}"></small>
+                </div>
+                <span class="text-muted">₹<span th:text="${item.quantity * (item.product.discountedPrice != null ? item.product.discountedPrice : item.product.sellingPrice)}"></span></span>
+              </div>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Total (INR)</span>
+              <strong>₹<span th:text="${total}"></span></strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+    <script>
+      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        alert("Your order has been placed successfully!");
+      });
+    </script>
+  </div>
+</body>
+
+</html>

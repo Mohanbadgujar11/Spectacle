@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{base}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sunglasses - Spectacle</title>
+  <th:block layout:fragment="styles">
+    <link rel="stylesheet" th:href="@{/css/product.css}" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </th:block>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <main>
+      <h2 style="text-align: center; margin: 2rem 0">
+        Trendy Sunglasses Collection
+      </h2>
+      <section id="product-grid" class="card-container" data-category="sunglasses">
+        <!-- Cards will appear here -->
+        
+        <!-- This is the blueprint for your cards -->
+        <a th:each="p : ${products}" th:href="@{/product-details(id=${p.id})}" class="card"
+        style="text-decoration: none;">
+        <img th:src="@{'/image/' + ${p.id}}" alt="Sunglasses" class="card-img-top product-img" />
+        <div class="card-body product-body">
+          <h5 class="card-title" th:text="${p.name}"></h5>
+          <p class="card-text product-description" th:text="${p.small_description}"></p>
+          <div class="product-meta">
+            <span class="discounted-price" th:text="'₹' + ${p.discountedPrice}"></span>
+            <span class="selling-price text-danger " th:text="'₹' + ${p.sellingPrice}"></span>
+              <span class="btn btn-custom btn-sm">
+                View Details
+              </span>
+            </div>
+          </div>
+        </a>
+      </section>
+      </main>
+  </div>
+</body>
+
+</html>

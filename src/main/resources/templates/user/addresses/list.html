@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{base}">
+<head>
+  <title>My Addresses</title>
+</head>
+<body>
+  <div layout:fragment="content">
+    <h2>My Addresses</h2>
+    <a th:href="@{/user/addresses/add}" class="btn btn-primary mb-3">Add new address</a>
+    <table class="table">
+      <thead>
+        <tr><th>Name</th><th>Address</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="addr : ${addresses}">
+          <td th:text="${addr.fullName}"></td>
+          <td th:text="${addr.fullAddress}"></td>
+          <td>
+            <a th:href="@{/user/addresses/update/{id}(id=${addr.id})}" class="btn btn-sm btn-secondary">Edit</a>
+            <a th:href="@{/user/addresses/delete/{id}(id=${addr.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this address?');">Delete</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

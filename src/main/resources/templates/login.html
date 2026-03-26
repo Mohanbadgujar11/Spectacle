@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{base}"
+>
+  <head>
+    <title>Login - Spectacle</title>
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <main class="auth-wrapper">
+        <div class="auth-form">
+          <h2>Login Page</h2>
+          <form th:action="@{/login}" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required />
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required />
+            <input type="submit" value="Login" />
+          </form>
+          <p class="auth-links">
+            Don't have an account? <a th:href="@{/register}">Register here</a>.
+          </p>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

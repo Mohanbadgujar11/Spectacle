@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" th:fragment="navbar">
+      <style>
+        .btn-logout {
+          background-color: #ff4d4d;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: bold;
+          transition: background-color 0.3s;
+          margin-left: 950px;
+        }
+        .btn-logout:hover {
+          background-color: #e60000;
+        }
+       
+      </style>
+      <div style="display: flex; align-items: center;">
+        <img class="logo" src="images/Frames/logo.jpg" alt="logo" />
+        <div class="brand-name">Spectacle.</div>
+      </div>
+      <ul class="nav-links">
+        <li><a th:href="@{/}">Home</a></li>
+        <li><a th:href="@{/#categories}">Shop</a></li>
+        <li><a th:href="@{/about}">About</a></li>
+        <li><a th:href="@{/contact}">Contact</a></li>
+        <li sec:authorize="hasAuthority('ADMIN')"><a th:href="@{/admin}">Admin</a></li>
+      </ul>
+
+      <!-- login link shown only to anonymous users -->
+      <div class="login-btn" sec:authorize="!isAuthenticated()">
+        <a th:href="@{/login}">LOGIN</a>
+      </div>
+
+      <!-- logout form shown only when user is authenticated -->
+      <div class="logout-btn" sec:authorize="isAuthenticated()">
+        <form th:action="@{/logout}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn-logout">LOGOUT</button>
+        </form>
+      </div>
+
+      <div class="cart-icon">
+        <a style="text-decoration: none; color: inherit" th:href="@{/cart}">
+          🛒Cart <span id="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+        </a>
+      </div>
+    </nav>
+</body>
+</html>

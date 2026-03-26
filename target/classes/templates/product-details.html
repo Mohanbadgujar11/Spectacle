@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{base}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Details - Spectacle</title>
+  <th:block layout:fragment="styles">
+    <link rel="stylesheet" th:href="@{/css/products.css}" />
+  </th:block>
+  <style>
+    .selling-price {
+      position: relative;
+      text-decoration: none;
+      display: inline-block;
+      width: fit-content;
+      /* Removes the default horizontal line-through if using <del> or <s> */
+    }
+
+    .selling-price::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      /* Aligns the line vertically in the middle of the text */
+      right: 0;
+      border-top: 2px solid;
+      /* Creates the line */
+      border-color: inherit;
+      /* Inherits the text color for the line */
+      transform: rotate(-7deg);
+      /* Adjust the angle (-ve for top-right to bottom-left slant) */
+    }
+  </style>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <main>
+      <!-- Case 1: Product found in Database (Server-side) -->
+      <div th:if="${product != null}" class="details-container">
+        <div class="details-left">
+          <img th:src="@{'/image/' + ${product.id}}" alt="Product Image" />
+        </div>
+        <div class="details-right">
+          <h2 th:text="${product.name}"></h2>
+          <h3 style="color: #000000; font-weight: bold;" th:text="'₹' + ${product.discountedPrice}"></h3>
+          <h3 class="text-danger selling-price " th:text="'₹' + ${product.sellingPrice}"></h3>
+          <p th:text="${product.small_description}"></p>
+          <p th:text="${product.description}"></p>
+
+
+          <div sec:authorize="isAuthenticated()">
+            <button class="btn btn-primary btn-lg" style="margin-top:1rem;" th:data-id="${product.id}"
+              th:data-name="${product.name}"
+              onclick="addToServerCart(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+              Add to Cart
+            </button>
+          </div>
+          <div sec:authorize="!isAuthenticated()">
+            <button class="btn btn-primary btn-lg" style="margin-top: 1rem" onclick="redirectToLogin()">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case 2: Product NOT in Database (Client-side fallback for static items) -->
+      <div th:if="${product == null}" class="details-container" id="details-container"
+        style="opacity: 0; transition: opacity 0.3s;">
+        <!-- Left Side: Big Image -->
+        <div class="details-left">
+          <img id="detail-img" src="" alt="Product Image" onerror="this.style.display='none'" />
+        </div>
+
+        <!-- Right Side: Product Info -->
+        <div class="details-right">
+          <h2 id="detail-title">Loading...</h2>
+          <h3 id="detail-price" style="color: #e67e22"></h3>
+          <p id="detail-desc"></p>
+          <button id="add-to-cart-btn" class="btn btn-primary btn-lg" style="margin-top: 1rem">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </main>
+
+
+    <!-- Logic to populate this page -->
+    <script th:inline="javascript">
+      // CSRF token and authentication flag available in JS
+      var csrfToken = /*[[${_csrf.token}]]*/ '';
+      var isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+
+      // redirect anonymous users to login
+      function redirectToLogin() {
+        window.location.href = '/login';
+      }
+
+      // helper for authenticated users (AJAX)
+      function addToServerCart(id, name) {
+        fetch(`/cart/add/${id}`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(res => {
+          if (res.ok) {
+            const cartCountEl = document.getElementById('cart-count');
+            if (cartCountEl) {
+              cartCountEl.innerText = parseInt(cartCountEl.innerText || '0') + 1;
+            }
+            alert(name + ' added to cart!');
+            // stay on same page, user can click cart icon when ready
+          } else {
+            alert('Could not add to cart');
+          }
+        }).catch(err => {
+          console.error(err);
+          alert('Error adding to cart');
+        });
+      }
+
+      // only run the fallback script when the server didn't supply a product
+      function loadProductDetails() {
+        if (!document.getElementById("details-container")) return;
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get("id");
+        const container = document.getElementById("details-container");
+        const product = products.find((p) => p.id == productId);
+        if (product) {
+          const imagePath = product.images[0].startsWith('/') ? product.images[0] : '/' + product.images[0];
+          document.getElementById("detail-img").src = imagePath;
+          document.getElementById("detail-title").innerText = product.name;
+          document.getElementById("detail-price").innerText = product.sellingPrice;
+          document.getElementById("detail-desc").innerText = product.description;
+          document
+            .getElementById("add-to-cart-btn")
+            .addEventListener("click", function () {
+              window.location.href = '/login';
+            });
+          container.style.opacity = 1;
+        } else {
+          document.querySelector(".details-container").innerHTML =
+            "<div class='text-center mt-5'><h2>Product not found!</h2><a href='/' class='btn btn-primary mt-3'>Go Home</a></div>";
+        }
+        const cartCountEl = document.getElementById("cart-count");
+        if (cartCountEl) {
+          cartCountEl.innerText = '0';
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadProductDetails);
+      } else {
+        loadProductDetails();
+      }
+    </script>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <th:block layout:fragment="styles">
+      <link rel="stylesheet" th:href="@{/css/style.css}" />
+    </th:block>
+</head>
+<body>
+    <main th:fragment="categories">
+      <!-- Contains the glass category like Eyeglasses Screen Glasses Kids Glasses Contact Lenses Sunglasses in a card format -->
+
+      <h1 class="categories-title text-center"><b>Our Top Categories</b></h1>
+      <section class="card-container" id="categories">
+        <a th:href="@{/eyeglasses}" class="card">
+          <img
+            th:src="@{/images/Categories/eyeglasses.webp}"
+            class="card-img-top product-img"
+            alt="eyeglasses"
+          />
+        </a>
+        <a th:href="@{/sunglasses}" class="card">
+          <img
+            th:src="@{/images/Categories/Sunglasses.webp}"
+            class="card-img-top product-img"
+            alt="Sunglasses"
+          />
+        </a>
+        <a th:href="@{/screen-glasses}" class="card">
+          <img
+            th:src="@{/images/Categories/special-power glasses.webp}"
+            class="card-img-top product-img"
+            alt="special-power glasses"
+          />
+        </a>
+        <a th:href="@{/contact-lenses}" class="card">
+          <img
+            th:src="@{/images/Categories/Contact lenses.webp}"
+            class="card-img-top product-img"
+            alt="Contact lenses"
+          />
+        </a>
+        <a th:href="@{/kids-glasses}" class="card">
+          <img
+            th:src="@{/images/Categories/Kids glasses.webp}"
+            class="card-img-top product-img"
+            alt="Kids glasses"
+          />
+        </a>
+      </section>
+    </main>
+</body>
+</html>

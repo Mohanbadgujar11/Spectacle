@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{base}">
+<head>
+    <title>My Orders - Spectacle</title>
+    <th:block layout:fragment="styles">
+      <style>
+        .sidebar-menu {
+          border-radius: 10px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+          overflow: hidden;
+          border: none;
+          margin-top: 100px;
+          margin-right: 50px;
+        }
+        .sidebar-menu .list-group-item {
+          border: none;
+          padding: 15px 20px;
+          color: #555;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          border-left: 4px solid transparent;
+        }
+        .sidebar-menu .list-group-item:hover {
+          background-color: #f9f9f9;
+          color: #f39c9c;
+          padding-left: 25px;
+        }
+        .sidebar-menu .list-group-item.active {
+          background-color: #fff;
+          color: #f39c9c;
+          border-left-color: #f39c9c;
+          font-weight: 600;
+          border-color: transparent;
+        }
+        .sidebar-menu i {
+          margin-right: 10px;
+          font-size: 1.1rem;
+        }
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background: #fff;
+        }
+        .order-header {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .order-body {
+            padding: 15px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+      </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <main class="container my-5">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 mb-4">
+                    <div class="list-group sidebar-menu">
+                        <a th:href="@{/cart}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-cart3"></i> My Cart
+                        </a>
+                        <a th:href="@{/orders}" class="list-group-item list-group-item-action active">
+                            <i class="bi bi-box-seam"></i> My Orders
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-md-9">
+                    <h2 style="text-align: center; margin-bottom: 2rem;">My Orders</h2>
+                    
+                    <div th:if="${orders == null or orders.isEmpty()}">
+                        <p class="text-center">You haven't placed any orders yet.</p>
+                    </div>
+
+                    <div th:each="order : ${orders}" class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <strong>Order #<span th:text="${order.id}"></span></strong><br>
+                                <small class="text-muted" th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}"></small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success" th:text="${order.status}">Placed</span><br>
+                                <strong>Total: ₹<span th:text="${order.totalAmount}"></span></strong>
+                            </div>
+                        </div>
+                        <div class="order-body">
+                            <div th:each="item : ${order.orderItems}" class="order-item">
+                                <div>
+                                    <span th:text="${item.product.name}">Product Name</span>
+                                    <br>
+                                    <small class="text-muted">Qty: <span th:text="${item.quantity}"></span></small>
+                                </div>
+                                <div>
+                                    ₹<span th:text="${item.price * item.quantity}"></span>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <small><strong>Delivery Address:</strong> <span th:text="${order.address.fullAddress}"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

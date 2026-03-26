@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add New Order</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container mt-4">
+        <div class="head">
+            <h1>Add New Order</h1>
+        </div>
+
+        <form th:action="@{/admin/orders/add}" method="post">
+            
+            <div class="mb-3">
+                <label for="user" class="form-label">Customer</label>
+                <select class="form-select" id="user" name="userId" required>
+                    <option value="" disabled selected>Select Customer</option>
+                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="product" class="form-label">Product</label>
+                <select class="form-select" id="product" name="productId" required>
+                    <option value="" disabled selected>Select Product</option>
+                    <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name}"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <select class="form-select" id="address" name="addressId" required>
+                    <option value="" disabled selected>Select Address</option>
+                    <option th:each="a : ${addresses}" th:value="${a.id}" th:text="${a.name + ', ' + a.city}"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Order</button>
+            <a th:href="@{/admin/orders}" class="btn btn-secondary ms-3">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <header class="hero" th:fragment="header">
+      <h1>Find Your Perfect Vision</h1>
+      <p>Premium eyewear for the look you want !</p>
+      <div class="search-container">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search for glasses ..."
+        />
+        <ul id="dropdownMenu" class="dropdown-menu">
+          <li><a th:href="@{/sunglasses}" class="dropdown-item">Sunglasses <i class="bi bi-arrow-up-left"></i></a></li>
+          <li><a th:href="@{/eyeglasses}" class="dropdown-item">Eyeglasses <i class="bi bi-arrow-up-left"></i></a></li>
+          <li><a th:href="@{/screen-glasses}" class="dropdown-item">Power glasses <i class="bi bi-arrow-up-left"></i></a></li>
+          <li><a th:href="@{/kids-glasses}" class="dropdown-item">Kids glasses <i class="bi bi-arrow-up-left"></i></a></li>
+          <li><a th:href="@{/contact-lenses}" class="dropdown-item">Contact lenses <i class="bi bi-arrow-up-left"></i></a></li>
+          <!-- <li><a href="#" class="dropdown-item">Red shade glasses <i class="bi bi-arrow-up-left"></i></a></li>
+          <li><a href="#" class="dropdown-item">Round glasses <i class="bi bi-arrow-up-left"></i></a></li>
+          <li><a href="#" class="dropdown-item">Blue cut glasses <i class="bi bi-arrow-up-left"></i></a></li> -->
+        </ul>
+      </div>
+    </header>
+</body>
+</html>

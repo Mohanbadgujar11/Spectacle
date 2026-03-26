@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{base}"
+>  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - Spectacle</title>
+  </head>
+  <body>
+        <div layout:fragment="content">
+
+
+    <main class="container my-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+          <h1 class="mb-4">About Us</h1>
+          <p class="lead">Redefining how you see the world, one frame at a time.</p>
+          <p>
+            Welcome to Spectacle, your premier destination for high-quality eyewear. 
+            We believe that glasses are more than just a necessity—they are a fashion statement. 
+            Our collection features a wide range of styles, from timeless classics to modern trends, ensuring there is something for everyone.
+          </p>
+          <p>
+            At Spectacle, we are dedicated to providing crystal-clear vision and exceptional comfort. 
+            Whether you need prescription glasses, stylish sunglasses, or daily contact lenses, we source only the best materials to ensure durability and style.
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    <script>
+      const savedCart = JSON.parse(localStorage.getItem("spectacle-cart")) || [];
+      document.getElementById("cart-count").innerText = savedCart.length;
+      </script>
+      </div>
+  </body>
+</html>

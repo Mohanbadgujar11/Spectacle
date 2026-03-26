@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{base}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Cart - Spectacle</title>
+    <th:block layout:fragment="styles">
+      <link rel="stylesheet" th:href="@{/css/products.css}" />
+      <style>
+        .sidebar-menu {
+          border-radius: 10px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+          overflow: hidden;
+          border: none;
+          margin-top: 100px;
+          margin-right: 50px;
+        }
+        .sidebar-menu .list-group-item {
+          border: none;
+          padding: 15px 20px;
+          color: #555;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          border-left: 4px solid transparent;
+        }
+        .sidebar-menu .list-group-item:hover {
+          background-color: #f9f9f9;
+          color: #f39c9c;
+          padding-left: 25px; /* Slight slide effect */
+        }
+        .sidebar-menu .list-group-item.active {
+          background-color: #fff;
+          color: #f39c9c;
+          border-left-color: #f39c9c;
+          font-weight: 600;
+          border-color: transparent;
+        }
+        .sidebar-menu i {
+          margin-right: 10px;
+          font-size: 1.1rem;
+        }
+      </style>
+    </th:block>
+    
+  <body>
+      <div layout:fragment="content">
+
+    <main class="container my-5">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+          <div class="list-group sidebar-menu">
+            <a th:href="@{/cart}" class="list-group-item list-group-item-action active">
+              <i class="bi bi-cart3"></i> My Cart
+            </a>
+            <a th:href="@{/orders}" class="list-group-item list-group-item-action">
+              <i class="bi bi-box-seam"></i> My Orders
+            </a>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9" id="cart-content">
+          <h2 style="text-align: center; margin-bottom: 2rem;">Your Shopping Cart</h2>
+
+      <div th:if="${cartItems == null or cartItems.isEmpty()}" id="empty-cart-msg">
+        <p style="text-align:center;">Your cart is empty.</p>
+      </div>
+
+      <div th:if="${cartItems != null and !cartItems.isEmpty()}">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="item : ${cartItems}">
+              <td th:text="${item.product.name}"></td>
+              <td>₹<span th:text="${item.product.discountedPrice != null ? item.product.discountedPrice : item.product.sellingPrice}"></span></td>
+              <td>
+                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" style="display:inline-block; width:4rem;">                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />                  <input type="number" name="quantity" min="1" th:value="${item.quantity}" class="form-control form-control-sm" 
+                           th:attr="data-price=${item.product.discountedPrice != null ? item.product.discountedPrice : item.product.sellingPrice},data-cartid=${item.id}" />
+                </form>
+              </td>
+              <td>₹<span th:text="${item.quantity * (item.product.discountedPrice != null ? item.product.discountedPrice : item.product.sellingPrice)}" 
+                               th:attr="data-rowprice=${item.product.discountedPrice != null ? item.product.discountedPrice : item.product.sellingPrice}"></span></td>
+              <td>
+                <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />                  <button class="btn btn-sm btn-danger">Remove</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="text-align: right; margin: 2rem;">
+          <strong>Total: ₹<span th:text="${total}"></span></strong>
+        </div>
+
+        <div style="text-align: center; margin: 2rem;">
+          <a href="/checkout"><button class="btn btn-success">Checkout</button></a>
+        </div>
+  </div>
+        </div>
+      </div>
+
+<!-- load product list so we can look up details for anonymous cart -->
+<script th:src="@{/javascript/products.js}"></script>
+<!-- render localStorage cart for guests -->
+<script sec:authorize="!isAuthenticated()" th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', () => {
+    const localIds = JSON.parse(localStorage.getItem('spectacle-cart')) || [];
+    if (localIds.length === 0) return;
+    // hide empty message if present
+    const emptyMsg = document.getElementById('empty-cart-msg');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+    // ensure table exists
+    let tbody = document.querySelector('tbody');
+    if (!tbody) {
+      const cartContent = document.getElementById('cart-content');
+      cartContent.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Product</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div style="text-align: right; margin: 2rem;" id="guest-total"></div>
+        <div style="text-align: center; margin: 2rem;">
+          <a href="/login"><button class="btn btn-success">Login to checkout</button></a>
+        </div>
+      `;
+      tbody = document.querySelector('tbody');
+    }
+    const productMap = {};
+    products.forEach(p => productMap[p.id] = p);
+    let grand = 0;
+    localIds.forEach(id => {
+      const prod = productMap[id];
+      if (!prod) return;
+      const price = prod.discountedPrice || prod.sellingPrice || prod.price || 0;
+      grand += price;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${prod.name}</td>
+        <td>₹${price}</td>
+        <td>1</td>
+        <td>₹${price}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="removeLocal('${id}')">Remove</button></td>`;
+      tbody.appendChild(tr);
+    });
+    const totalDiv = document.getElementById('guest-total');
+    if (totalDiv) totalDiv.innerHTML = `<strong>Total: ₹${grand}</strong>`;
+  });
+
+  function removeLocal(id) {
+    let cart = JSON.parse(localStorage.getItem('spectacle-cart')) || [];
+    cart = cart.filter(i => i != id);
+    localStorage.setItem('spectacle-cart', JSON.stringify(cart));
+    location.reload();
+  }
+</script>
+
+<!-- update totals when quantity changes (authenticated users) -->
+<script th:inline="javascript" sec:authorize="isAuthenticated()">
+  document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = /*[[${_csrf.token}]]*/ '';
+    function recalcGrand() {
+      let sum = 0;
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        const txt = tr.querySelector('td:nth-child(4) span').textContent.replace(/[^0-9.]/g, '');
+        sum += parseFloat(txt) || 0;
+      });
+      const totalEl = document.querySelector('div strong span');
+      if (totalEl) totalEl.textContent = sum.toFixed(2);
+    }
+
+    document.querySelectorAll('input[name="quantity"]').forEach(input => {
+      input.addEventListener('change', async (e) => {
+        const qty = parseInt(e.target.value) || 1;
+        const price = parseFloat(e.target.dataset.price) || 0;
+        const cartId = e.target.dataset.cartid;
+        const rowTotalEl = e.target.closest('tr').querySelector('td:nth-child(4) span');
+        if (rowTotalEl) {
+          rowTotalEl.textContent = (qty * price).toFixed(2);
+        }
+        recalcGrand();
+        // persist to server
+        try {
+          await fetch(`/cart/update/${cartId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRF-TOKEN': csrfToken
+            },
+            body: 'quantity=' + qty
+          });
+        } catch (err) {
+          console.error('cart update failed', err);
+        }
+      });
+    });
+  });
+</script>
+    </main>
+    </div>
+  </body>
+</html>
