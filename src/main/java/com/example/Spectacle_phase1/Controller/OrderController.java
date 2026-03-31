@@ -38,8 +38,7 @@ public class OrderController {
     public String getAllOrders(Model model) {
         List<Order> orders = orderRepository.findAll();
         model.addAttribute("orders", orders);
-        // FIX: Return the full path to the template in the subfolder
-        return "Admin/Order/view_order"; 
+        return "Admin/Order/View_order"; 
     }
 
     // Show Add Order Form
@@ -48,7 +47,7 @@ public class OrderController {
         model.addAttribute("users", userRepository.findAll());
         model.addAttribute("products", productRepository.findAll());
         model.addAttribute("addresses", addressRepository.findAll());
-        return "Admin/Order/add_order";
+        return "Admin/Order/Add_order";
     }
 
     // Handle Add Order Submission
@@ -102,7 +101,7 @@ public class OrderController {
             model.addAttribute("currentQuantity", firstItem.getQuantity());
         }
         
-        return "Admin/Order/update_order";
+        return "Admin/Order/Update_order";
     }
 
     // Handle Update Order Submission

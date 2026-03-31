@@ -27,7 +27,7 @@ public class CartController {
     @GetMapping
     public String listCart(Model model) {
         model.addAttribute("cartItems", cartRepository.findAll());
-        return "/admin/cart/view_list";
+        return "Admin/Cart/View_list";
     }
 
     @GetMapping("/add")
@@ -35,7 +35,7 @@ public class CartController {
         model.addAttribute("cart", new Cart());
         model.addAttribute("users", userRepository.findAll());
         model.addAttribute("products", productRepository.findAll());
-        return "/admin/cart/add_list";
+        return "Admin/Cart/Add_list";
     }
 
     @PostMapping("/add")

@@ -24,20 +24,20 @@ public class AddressController {
     @GetMapping
     public String viewAddresses(Model model) {
         model.addAttribute("addresses", addressRepository.findAll()); 
-        return "admin/address/view_address";  
+        return "Admin/Address/View_address";  
     }
 
     @GetMapping("/add")
     public String addAddressForm(Model model) {
         model.addAttribute("address", new Address());  
         model.addAttribute("users", userRepository.findAll());  
-        return "admin/address/add_address";  
+        return "Admin/Address/Add_address";  
     }
 
     @PostMapping("/add")
     public String addAddress(@ModelAttribute Address address) {
         addressRepository.save(address);  
-        return "redirect:/admin/addresses";  
+        return "redirect:/admin/addresses";
     }
 
     @GetMapping("/update/{id}")
@@ -46,7 +46,7 @@ public class AddressController {
         
         model.addAttribute("address", address);
         model.addAttribute("users", userRepository.findAll());  
-        return "admin/address/update_address";  
+        return "Admin/Address/Update_address";  
     }
 
     @PostMapping("/update")

@@ -25,14 +25,14 @@ public class ProductController {
     @GetMapping
     public String viewproducts(Model model) {
         model.addAttribute("products", productRepository.findAll());
-        return "admin/product/view_product";
+        return "Admin/Product/View_product";
     }
 
     @GetMapping("/add")
     public String addproductForm(Model model) {
         model.addAttribute("product", new Product());
         model.addAttribute("categories", Category.values());
-        return "admin/product/add_product";
+        return "Admin/Product/Add_product";
     }
 
     @PostMapping("/add")
@@ -52,7 +52,7 @@ public class ProductController {
         Product product = productRepository.findById(id).orElse(new Product());
         model.addAttribute("product", product);
         model.addAttribute("categories", Category.values());
-        return "admin/product/update_product";
+        return "Admin/Product/Update_product";
     }
 
     @PostMapping("/update")
