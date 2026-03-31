@@ -99,32 +99,4 @@ public class ProductController {
     public Product getProductAPI(@PathVariable Long id) {
         return productRepository.findById(id).orElse(null);
     }
-
-    @GetMapping("/delete/{id}")
-    public String deleteproduct(@PathVariable Long id) {
-        productRepository.deleteById(id);
-        return "redirect:/admin/products";
-    }
-
-    @GetMapping("/delete")
-    public String deleteAllProducts(RedirectAttributes redirectAttributes) {
-        productRepository.deleteAll();
-        redirectAttributes.addFlashAttribute("message", "All products deleted successfully!");
-        return "redirect:/admin/products";
-    }
-
-    @GetMapping("/image/{id}")
-    @ResponseBody // returned raw object directly to the HTTP response body not the template.
-    public byte[] getImage(@PathVariable Long id) {
-        return productRepository.findById(id)
-                .map(Product::getProductImage)
-                .orElse(null); // Return null if product not found, preventing a crash.
-    }
-
-    // REST API endpoint for fetching product details (used by cart.html)
-    @GetMapping("/api/{id}")
-    @ResponseBody
-    public Product getProductAPI(@PathVariable Long id) {
-        return productRepository.findById(id).orElse(null);
-    }
 }
