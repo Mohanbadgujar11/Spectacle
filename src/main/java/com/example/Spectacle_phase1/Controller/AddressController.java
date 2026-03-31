@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Spectacle_phase1.Model.Address;
 import com.example.Spectacle_phase1.Repository.AddressRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ public class AddressController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public String viewAddresses(Model model) {
         List<Address> addresses = addressRepository.findAll();
         // Filter out addresses that might have a null user to prevent template crashes

@@ -8,6 +8,7 @@ import com.example.Spectacle_phase1.Model.Cart;
 import com.example.Spectacle_phase1.Repository.CartRepository;
 import com.example.Spectacle_phase1.Repository.ProductRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class CartController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public String listCart(Model model) {
         List<Cart> cartItems = cartRepository.findAll();
         // Filter out cart items that might have a null user or product to prevent template crashes

@@ -11,6 +11,7 @@ import com.example.Spectacle_phase1.Repository.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class OrderController {
 
     // View All Orders
     @GetMapping
+    @Transactional(readOnly = true)
     public String getAllOrders(Model model) {
         List<Order> orders = orderRepository.findAll();
         // Defensively filter out orders with missing critical data to prevent template crashes

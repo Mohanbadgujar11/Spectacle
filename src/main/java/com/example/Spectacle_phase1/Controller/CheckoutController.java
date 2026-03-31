@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class CheckoutController {
     }
 
     @GetMapping("/checkout")
+    @Transactional(readOnly = true)
     public String checkoutPage(Model model, Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/login";
@@ -53,6 +55,7 @@ public class CheckoutController {
     }
 
     @PostMapping("/checkout")
+    @Transactional
     public String placeOrder(@RequestParam(required = false) Long addressId,
                              @ModelAttribute Address newAddress,
                              @RequestParam String paymentMethod,

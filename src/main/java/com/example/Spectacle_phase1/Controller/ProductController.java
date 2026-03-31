@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.Spectacle_phase1.Model.Product;
 import com.example.Spectacle_phase1.Model.enums.Category;
 import com.example.Spectacle_phase1.Repository.ProductRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -23,6 +24,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public String viewproducts(Model model) {
         model.addAttribute("products", productRepository.findAll());
         return "Admin/Product/View_product";
