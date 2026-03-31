@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Spectacle_phase1.Model.Address;
 import com.example.Spectacle_phase1.Repository.AddressRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/addresses")
@@ -23,7 +25,12 @@ public class AddressController {
 
     @GetMapping
     public String viewAddresses(Model model) {
-        model.addAttribute("addresses", addressRepository.findAll()); 
+        List<Address> addresses = addressRepository.findAll();
+        // Filter out addresses that might have a null user to prevent template crashes
+        List<Address> validAddresses = addresses.stream()
+                .filter(a -> a.getUser() != null)
+                .collect(Collectors.toList());
+        model.addAttribute("addresses", validAddresses);
         return "Admin/Address/View_address";  
     }
 

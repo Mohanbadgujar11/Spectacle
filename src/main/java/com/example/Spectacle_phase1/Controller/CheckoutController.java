@@ -32,6 +32,10 @@ public class CheckoutController {
             return "redirect:/login";
         }
         User user = userRepository.findByUsername(auth.getName()).orElse(null);
+        if (user == null) {
+            // This case should not happen for an authenticated user, but as a safeguard:
+            return "redirect:/login?error";
+        }
         List<Cart> cartItems = cartRepository.findByUser(user);
         if (cartItems.isEmpty()) {
             return "redirect:/cart";
@@ -57,6 +61,9 @@ public class CheckoutController {
             return "redirect:/login";
         }
         User user = userRepository.findByUsername(auth.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/login?error";
+        }
         
         // 1. Resolve Address
         Address deliveryAddress;

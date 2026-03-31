@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/orders")
@@ -37,8 +38,12 @@ public class OrderController {
     @GetMapping
     public String getAllOrders(Model model) {
         List<Order> orders = orderRepository.findAll();
-        model.addAttribute("orders", orders);
-        return "Admin/Order/View_order"; 
+        // Defensively filter out orders with missing critical data to prevent template crashes
+        List<Order> validOrders = orders.stream()
+                .filter(o -> o.getUser() != null && o.getAddress() != null)
+                .collect(Collectors.toList());
+        model.addAttribute("orders", validOrders);
+        return "Admin/Order/View_order";
     }
 
     // Show Add Order Form

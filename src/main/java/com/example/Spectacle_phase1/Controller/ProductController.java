@@ -88,8 +88,9 @@ public class ProductController {
     @GetMapping("/image/{id}")
     @ResponseBody // returned raw object directly to the HTTP response body not the template.
     public byte[] getImage(@PathVariable Long id) {
-        Product product = productRepository.findById(id).orElseThrow();
-        return product.getProductImage();
+        return productRepository.findById(id)
+                .map(Product::getProductImage)
+                .orElse(null); // Return null if product not found, preventing a crash.
     }
 
     // REST API endpoint for fetching product details (used by cart.html)

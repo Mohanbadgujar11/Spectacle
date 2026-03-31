@@ -8,6 +8,8 @@ import com.example.Spectacle_phase1.Model.Cart;
 import com.example.Spectacle_phase1.Repository.CartRepository;
 import com.example.Spectacle_phase1.Repository.ProductRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/cart")
@@ -26,7 +28,12 @@ public class CartController {
 
     @GetMapping
     public String listCart(Model model) {
-        model.addAttribute("cartItems", cartRepository.findAll());
+        List<Cart> cartItems = cartRepository.findAll();
+        // Filter out cart items that might have a null user or product to prevent template crashes
+        List<Cart> validCartItems = cartItems.stream()
+                .filter(c -> c.getUser() != null && c.getProduct() != null)
+                .collect(Collectors.toList());
+        model.addAttribute("cartItems", validCartItems);
         return "Admin/Cart/View_list";
     }
 
