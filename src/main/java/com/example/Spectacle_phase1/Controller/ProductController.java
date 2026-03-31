@@ -27,14 +27,18 @@ public class ProductController {
     @Transactional(readOnly = true)
     public String viewproducts(Model model) {
         model.addAttribute("products", productRepository.findAll());
-		return "Admin/Product/view_Product";
-	}
+        return "Admin/Product/view_Product";
+    }
 
-	@GetMapping("/add")
-	public String addproductForm(Model model) {
-		model.addAttribute("product", new Product());
-		model.addAttribute("categories", Category.values());
-		return "Admin/Product/add_Product";
+    @GetMapping("/add")
+    public String addproductForm(Model model) {
+        model.addAttribute("product", new Product());
+        model.addAttribute("categories", Category.values());
+        return "Admin/Product/add_Product";
+    }
+
+    @PostMapping("/add")
+    public String addproduct(@ModelAttribute Product product,
             @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
 
         if (!imageFile.isEmpty()) {
@@ -50,19 +54,50 @@ public class ProductController {
         Product product = productRepository.findById(id).orElse(new Product());
         model.addAttribute("product", product);
         model.addAttribute("categories", Category.values());
-		return "Admin/Product/update_Product";
+        return "Admin/Product/update_Product";
+    }
 
-        // If a new image is uploaded, set it
+    @PostMapping("/update")
+    public String updateproduct(@ModelAttribute Product product,
+            @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+
         if (!imageFile.isEmpty()) {
             product.setProductImage(imageFile.getBytes());
         } else {
-            // If no new image, keep the existing one from the database
             Product existingProduct = productRepository.findById(product.getId()).orElse(new Product());
             product.setProductImage(existingProduct.getProductImage());
         }
 
         productRepository.save(product);
         return "redirect:/admin/products";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteproduct(@PathVariable Long id) {
+        productRepository.deleteById(id);
+        return "redirect:/admin/products";
+    }
+
+    @GetMapping("/delete")
+    public String deleteAllProducts(RedirectAttributes redirectAttributes) {
+        productRepository.deleteAll();
+        redirectAttributes.addFlashAttribute("message", "All products deleted successfully!");
+        return "redirect:/admin/products";
+    }
+
+    @GetMapping("/image/{id}")
+    @ResponseBody // returned raw object directly to the HTTP response body not the template.
+    public byte[] getImage(@PathVariable Long id) {
+        return productRepository.findById(id)
+                .map(Product::getProductImage)
+                .orElse(null); // Return null if product not found, preventing a crash.
+    }
+
+    // REST API endpoint for fetching product details (used by cart.html)
+    @GetMapping("/api/{id}")
+    @ResponseBody
+    public Product getProductAPI(@PathVariable Long id) {
+        return productRepository.findById(id).orElse(null);
     }
 
     @GetMapping("/delete/{id}")
