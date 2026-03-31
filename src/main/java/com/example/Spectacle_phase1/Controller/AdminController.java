@@ -10,6 +10,6 @@ public class AdminController {
 
     @GetMapping
     public String dashboard() {
-        return "admin/dashboard"; // view for administrator main page
+        return "Admin/dashboard"; // view for administrator main page
     }
 }
