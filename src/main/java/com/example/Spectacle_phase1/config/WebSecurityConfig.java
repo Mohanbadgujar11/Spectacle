@@ -69,13 +69,22 @@ public class WebSecurityConfig {
 	@Bean
 	public UserDetailsService userDetailsService() {
 		return username -> userRepository.findByUsername(username)
-				.map(user -> org.springframework.security.core.userdetails.User.builder()
-						.username(user.getUsername())
-						// .password(user.getPassword()) // this was causing the admin panner issue after deployment
-						// .roles(user.getRole())
-						.password(user.getPassword())
-						.authorities("ROLE_" + user.getRole()) // Use authorities to add the ROLE_ prefix
-						.build())
+				.map(user -> {
+					String role = user.getRole();
+					if (role == null || role.isBlank()) {
+						role = "USER";
+					} else {
+						role = role.trim().toUpperCase();
+						if (role.startsWith("ROLE_")) {
+							role = role.substring(5);
+						}
+					}
+					return org.springframework.security.core.userdetails.User.builder()
+							.username(user.getUsername())
+							.password(user.getPassword())
+							.roles(role)
+							.build();
+				})
 				.orElseThrow(() -> new UsernameNotFoundException("User Not Found"));
 	}
 
