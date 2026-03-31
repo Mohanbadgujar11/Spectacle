@@ -27,18 +27,14 @@ public class ProductController {
     @Transactional(readOnly = true)
     public String viewproducts(Model model) {
         model.addAttribute("products", productRepository.findAll());
-        return "Admin/Product/View_product";
-    }
+		return "Admin/Product/view_Product";
+	}
 
-    @GetMapping("/add")
-    public String addproductForm(Model model) {
-        model.addAttribute("product", new Product());
-        model.addAttribute("categories", Category.values());
-        return "Admin/Product/Add_product";
-    }
-
-    @PostMapping("/add")
-    public String addproduct(@ModelAttribute Product product,
+	@GetMapping("/add")
+	public String addproductForm(Model model) {
+		model.addAttribute("product", new Product());
+		model.addAttribute("categories", Category.values());
+		return "Admin/Product/add_Product";
             @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
 
         if (!imageFile.isEmpty()) {
@@ -54,12 +50,7 @@ public class ProductController {
         Product product = productRepository.findById(id).orElse(new Product());
         model.addAttribute("product", product);
         model.addAttribute("categories", Category.values());
-        return "Admin/Product/Update_product";
-    }
-
-    @PostMapping("/update")
-    public String updateproduct(@ModelAttribute Product product,
-            @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+		return "Admin/Product/update_Product";
 
         // If a new image is uploaded, set it
         if (!imageFile.isEmpty()) {

@@ -45,17 +45,17 @@ public class OrderController {
                 .filter(o -> o.getUser() != null && o.getAddress() != null)
                 .collect(Collectors.toList());
         model.addAttribute("orders", validOrders);
-        return "Admin/Order/View_order";
-    }
+		return "Admin/Order/view_order";
+	}
 
-    // Show Add Order Form
-    @GetMapping("/add")
-    public String addOrderForm(Model model) {
-        model.addAttribute("users", userRepository.findAll());
-        model.addAttribute("products", productRepository.findAll());
-        model.addAttribute("addresses", addressRepository.findAll());
-        return "Admin/Order/Add_order";
-    }
+	// Show Add Order Form
+	@GetMapping("/add")
+	public String addOrderForm(Model model) {
+		model.addAttribute("users", userRepository.findAll());
+		model.addAttribute("products", productRepository.findAll());
+		model.addAttribute("addresses", addressRepository.findAll());
+		return "Admin/Order/add_order";
+	}
 
     // Handle Add Order Submission
     @PostMapping("/add")
@@ -108,7 +108,7 @@ public class OrderController {
             model.addAttribute("currentQuantity", firstItem.getQuantity());
         }
         
-        return "Admin/Order/Update_order";
+return "Admin/Order/update_order";
     }
 
     // Handle Update Order Submission
