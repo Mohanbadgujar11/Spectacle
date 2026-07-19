@@ -2,6 +2,7 @@ package com.example.Spectacle_phase1.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,23 +29,24 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize
 						// Allow public access to static resources, home, login, register, and product
 						// pages
-						.requestMatchers(
-								"/",
-								"/login",
-								"/register",
-								"/about",
-								"/contact",
-								"/css/**",
-								"/javascript/**",
-								"/images/**",
-								"/product-details", 
-								"/image/**",
-								"/eyeglasses",
-								"/sunglasses",
-								"/screen-glasses",
-								"/contact-lenses",
-								"/kids-glasses"
-						).permitAll()
+					.requestMatchers(HttpMethod.GET, "/contact").permitAll()
+					.requestMatchers(
+							"/",
+							"/login",
+							"/register",
+							"/about",
+							"/css/**",
+							"/javascript/**",
+							"/images/**",
+							"/product-details", 
+							"/image/**",
+							"/eyeglasses",
+							"/sunglasses",
+							"/screen-glasses",
+							"/contact-lenses",
+							"/kids-glasses"
+					).permitAll()
+					.requestMatchers(HttpMethod.POST, "/contact").authenticated()
 						// Secure admin pages - use hasRole() which automatically adds ROLE_ prefix
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						// All other requests require authentication

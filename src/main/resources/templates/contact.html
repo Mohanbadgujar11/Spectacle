@@ -21,23 +21,24 @@
         <div class="col-md-6">
           <div class="card shadow p-4">
             <h3 class="mb-3">Send a Message</h3>
-            <form>
+            <form th:action="@{/contact}" method="post">
+              
               <div class="mb-3">
                 <label for="name" class="form-label">Your Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Enter your name" required />
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required />
               </div>
               <div class="mb-3">
                 <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" placeholder="name@example.com" required />
+                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required />
               </div>
               <div class="mb-3">
                 <label for="contact" class="form-label">Contact Number</label>
-                <input type="tel" class="form-control" id="contact-number" placeholder="98765 43219" pattern="[0-9]{10}"
+                <input type="tel" class="form-control" id="contact-number" name="contact-number" placeholder="98765 43219" pattern="[0-9]{10}"
                   maxlength="10" required />
               </div>
               <div class="mb-3">
                 <label for="message" class="form-label">Message</label>
-                <textarea class="form-control" id="message" rows="5" placeholder="How can we help you?"
+                <textarea class="form-control" id="message" name="message" rows="5" placeholder="How can we help you?"
                   required></textarea>
               </div>
               <button id="submit" type="submit" class="btn btn-primary w-100"
@@ -70,53 +71,39 @@
       </div>
     </main>
 
-    <div id="myModal" class="modal-overlay">
-      <!-- Modal Content Box -->
-      <div class="custom-modal-content">
-        <span id="closeBtn" class="close-x">&times;</span>
-        <h2>Message Sent!</h2>
-        <p>Thank you for contacting us! We will get back to you shortly.</p>
+    <div id="successModal" class="success-modal" style="display:none;">
+      <div class="success-modal-content">
+        <h4>Thanks! Your message has been sent!</h4>
+        <button id="successModalOk" type="button" class="btn btn-primary mt-3">OK</button>
       </div>
     </div>
 
-
     <style>
-      /* Overlay: covers the whole screen */
-      .modal-overlay {
-        display: none;
-        /* Hidden by default */
+      .success-modal {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        /* Semi-transparent black */
-        z-index: 1000;
-        /* Sit on top of everything */
-      }
-
-      /* Content Box: centered in the middle of the overlay */
-      .custom-modal-content {
-        background-color: white;
-        margin: 15% auto;
-        /* 15% from top and centered horizontally */
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
         padding: 20px;
-        width: 50%;
-        border-radius: 8px;
-        position: relative;
       }
 
-      /* Close button (x) */
-      .close-x {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 24px;
-        cursor: pointer;
+      .success-modal-content {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        padding: 28px 24px;
+        text-align: center;
+        max-width: 420px;
+        width: 100%;
       }
 
-    
+      .success-modal-content h4 {
+        margin: 0;
+        color: #333;
+      }
     </style>
 
   </div>

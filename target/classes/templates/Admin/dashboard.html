@@ -40,6 +40,35 @@
       </div>
 
       <div class="row g-4 justify-content-center">
+        <div class="col-12">
+          <div class="card dashboard-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="mb-0">Recent Contact Messages</h3>
+              <a th:href="@{/admin/messages}" class="btn btn-outline-primary btn-sm">View All</a>
+            </div>
+            <div th:if="${#lists.isEmpty(recentMessages)}" class="text-muted">No contact messages yet.</div>
+            <div th:unless="${#lists.isEmpty(recentMessages)}" class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Contact</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="message : ${recentMessages}">
+                    <td th:text="${message.name}"></td>
+                    <td th:text="${message.email}"></td>
+                    <td th:text="${message.contactNumber}"></td>
+                    <td th:text="${message.message}"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         <!-- Manage Users -->
         <div class="col-md-4 col-sm-6">
           <a th:href="@{/admin/users}" class="card-link">

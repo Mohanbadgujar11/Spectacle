@@ -1,5 +1,4 @@
 com\example\Spectacle_phase1\Model\Product.class
-com\example\Spectacle_phase1\Controller\AdminController.class
 com\example\Spectacle_phase1\Repository\OrderRepository.class
 com\example\Spectacle_phase1\Model\enums\State.class
 com\example\Spectacle_phase1\Controller\AddressController.class

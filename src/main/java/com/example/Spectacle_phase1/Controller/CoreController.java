@@ -29,11 +29,6 @@ public class CoreController {
         return "about";
     }
 
-    @GetMapping("/contact")
-    public String contact() {
-        return "contact";
-    }
-
     // @GetMapping("/register")
     // public String register() {
     //     return "register";

@@ -154,47 +154,25 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Contact Page Modal Logic
-const submitbtn = document.querySelector("#submit");
-const closeBtn = document.getElementById("closeBtn");
-const modal = document.getElementById("myModal");
+// Contact form submission is handled by the server to ensure proper login redirect behavior.
+if (window.location.pathname === '/contact') {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sent') === 'true') {
+    const modal = document.getElementById('successModal');
+    const okButton = document.getElementById('successModalOk');
 
-if (submitbtn && modal && closeBtn) {
-  // Function to open the modal
-  submitbtn.onclick = function (e) {
-    e.preventDefault();
-
-    const form = submitbtn.closest("form");
-    const contactInput = document.getElementById("contact-number");
-
-    // Check specifically for 10 digits if user entered something
-    if (contactInput && contactInput.value.length > 0 && contactInput.value.length !== 10) {
-      alert("Please enter a valid 10-digit contact number.");
-      return;
+    if (modal) {
+      modal.style.display = 'flex';
+      if (okButton) {
+        okButton.addEventListener('click', () => {
+          modal.style.display = 'none';
+        }, { once: true });
+      }
     }
 
-    // Check if all required fields are filled and valid
-    if (form && !form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    modal.style.display = "block";
-  };
-
-  // Function to close the modal
-  closeBtn.onclick = function () {
-    modal.style.display = "none";
-  };
-
-  // Close modal if user clicks anywhere outside the content box
-  window.onclick = function (event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  };
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 }
-
 
 // making sure the contact page has onlyh 10 number of digits not less not more 
 
