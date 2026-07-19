@@ -86,7 +86,7 @@ public class UserController {
     }
 
     // Delete a user
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     @Transactional
     public String deleteUser(@PathVariable Long id) {
         userRepository.findById(id).ifPresent(user -> {

@@ -46,6 +46,7 @@ public class WebSecurityConfig {
 							"/contact-lenses",
 							"/kids-glasses"
 					).permitAll()
+					.requestMatchers(HttpMethod.POST, "/register").permitAll()
 					.requestMatchers(HttpMethod.POST, "/contact").authenticated()
 						// Secure admin pages - use hasRole() which automatically adds ROLE_ prefix
 						.requestMatchers("/admin/**").hasRole("ADMIN")
