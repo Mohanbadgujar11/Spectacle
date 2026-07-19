@@ -71,7 +71,7 @@ public class WebSecurityConfig {
 
 	@Bean
 	public UserDetailsService userDetailsService() {
-		return username -> userRepository.findByUsername(username)
+		return username -> userRepository.findByUsernameIgnoreCase(username)
 				.map(user -> {
 					String role = user.getRole();
 					if (role == null || role.isBlank()) {
