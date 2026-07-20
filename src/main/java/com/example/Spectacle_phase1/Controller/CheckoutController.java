@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class CheckoutController {
@@ -38,7 +39,11 @@ public class CheckoutController {
             // This case should not happen for an authenticated user, but as a safeguard:
             return "redirect:/login?error";
         }
-        List<Cart> cartItems = cartRepository.findByUser(user);
+        // Filter out cart items with null products to prevent errors.
+        // This can happen if a product was deleted but cart items remained.
+        List<Cart> cartItems = cartRepository.findByUser(user).stream()
+                .filter(cartItem -> cartItem.getProduct() != null)
+                .collect(Collectors.toList());
         if (cartItems.isEmpty()) {
             return "redirect:/cart";
         }
@@ -78,7 +83,10 @@ public class CheckoutController {
         }
 
         // 2. Get Cart Items
-        List<Cart> cartItems = cartRepository.findByUser(user);
+        // Filter out cart items with null products to prevent errors during order creation.
+        List<Cart> cartItems = cartRepository.findByUser(user).stream()
+                .filter(cartItem -> cartItem.getProduct() != null)
+                .collect(Collectors.toList());
         if (cartItems.isEmpty()) {
             return "redirect:/cart";
         }
@@ -117,12 +125,17 @@ public class CheckoutController {
     }
 
     @GetMapping("/orders")
+    @Transactional(readOnly = true)
     public String myOrders(Model model, Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/login";
         }
         User user = userRepository.findByUsername(auth.getName()).orElse(null);
-        model.addAttribute("orders", orderRepository.findByUserOrderByOrderDateDesc(user));
+        List<Order> orders = orderRepository.findByUserOrderByOrderDateDesc(user);
+        // Eagerly fetch OrderItems to prevent LazyInitializationException in the template.
+        // This ensures the data is loaded before the transaction closes.
+        orders.forEach(order -> order.getOrderItems().size());
+        model.addAttribute("orders", orders);
         return "order";
     }
 }

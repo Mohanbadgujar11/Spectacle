@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.Spectacle_phase1.Model.Product;
 import com.example.Spectacle_phase1.Model.enums.Category;
+import com.example.Spectacle_phase1.Repository.CartRepository;
 import com.example.Spectacle_phase1.Repository.ProductRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductController {
 
     private final ProductRepository productRepository;
+    private final CartRepository cartRepository;
 
-    public ProductController(ProductRepository productRepository) {
+    public ProductController(ProductRepository productRepository, CartRepository cartRepository) {
         this.productRepository = productRepository;
+        this.cartRepository = cartRepository;
     }
 
     @GetMapping
@@ -72,17 +75,29 @@ public class ProductController {
         return "redirect:/admin/products";
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
+    @Transactional
     public String deleteproduct(@PathVariable Long id) {
-        productRepository.deleteById(id);
+        productRepository.findById(id).ifPresent(product -> {
+            // Before deleting the product, we must delete all associated Cart items
+            // to maintain data integrity and prevent checkout errors.
+            // NOTE: This requires `List<Cart> findByProduct(Product product);` in your CartRepository.
+            cartRepository.deleteAll(cartRepository.findByProduct(product));
+
+            productRepository.delete(product);
+        });
         return "redirect:/admin/products";
     }
 
-    @GetMapping("/delete")
+    @PostMapping("/delete-all")
+    @Transactional
     public String deleteAllProducts(RedirectAttributes redirectAttributes) {
+        // To maintain data integrity, first delete all items from carts,
+        // then delete all products.
+        cartRepository.deleteAll();
         productRepository.deleteAll();
         redirectAttributes.addFlashAttribute("message", "All products deleted successfully!");
-        return "redirect:/admin/products";
+        return "redirect:/admin/products"; // Changed path to be more descriptive
     }
 
     @GetMapping("/image/{id}")

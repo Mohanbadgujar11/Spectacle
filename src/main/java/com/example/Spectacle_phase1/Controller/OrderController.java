@@ -40,9 +40,11 @@ public class OrderController {
     @Transactional(readOnly = true)
     public String getAllOrders(Model model) {
         List<Order> orders = orderRepository.findAll();
-        // Defensively filter out orders with missing critical data to prevent template crashes
+        // Defensively filter out orders with missing critical data to prevent template crashes.
+        // This now also checks that every item in an order has a valid, non-null product.
         List<Order> validOrders = orders.stream()
-                .filter(o -> o.getUser() != null && o.getAddress() != null)
+                .filter(o -> o.getUser() != null && o.getAddress() != null && o.getOrderItems() != null)
+                .filter(o -> o.getOrderItems().stream().allMatch(item -> item.getProduct() != null))
                 .collect(Collectors.toList());
         model.addAttribute("orders", validOrders);
 		return "Admin/Order/view_order";

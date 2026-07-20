@@ -1,4 +1,6 @@
 package com.example.Spectacle_phase1.Repository;
+import com.example.Spectacle_phase1.Model.Product;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,4 +16,7 @@ public interface CartRepository extends JpaRepository <Cart,Long>{
 
     // delete an entry by user and product (if needed)
     void deleteByUserAndProduct(com.example.Spectacle_phase1.Model.User user, com.example.Spectacle_phase1.Model.Product product);
+
+    List<Cart> findByProduct(Product product);
+
 } 
