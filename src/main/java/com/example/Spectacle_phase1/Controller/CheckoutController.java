@@ -50,8 +50,13 @@ public class CheckoutController {
             return "redirect:/cart";
         }
         
-        double total = cartItems.stream() // This stream is now safe
-                .mapToDouble(i -> i.getQuantity() * (i.getProduct().getDiscountedPrice() != null ? i.getProduct().getDiscountedPrice() : i.getProduct().getSellingPrice()))
+        double total = cartItems.stream()
+                .mapToDouble(cartItem -> {
+                    Product product = cartItem.getProduct();
+                    int quantity = cartItem.getQuantity();
+                    double price = (product.getDiscountedPrice() != null) ? product.getDiscountedPrice() : product.getSellingPrice();
+                    return quantity * price;
+                })
                 .sum();
 
         model.addAttribute("cartItems", cartItems);
