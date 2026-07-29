@@ -105,4 +105,14 @@ public class Product {
     public void setCartItems(List<Cart> cartItems) {
         this.cartItems = cartItems;
     }
+
+    // Helper method to get the effective price, handling nulls
+    public double getEffectivePrice() {
+        if (this.discountedPrice != null) {
+            return this.discountedPrice.doubleValue();
+        } else if (this.sellingPrice != null) {
+            return this.sellingPrice.doubleValue();
+        }
+        return 0.0; // Default to 0 if both are null
+    }
 }

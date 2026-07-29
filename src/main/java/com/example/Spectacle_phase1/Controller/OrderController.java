@@ -76,7 +76,7 @@ public class OrderController {
         order.setPaymentMethod("COD");
 
         // Calculate price
-        double price = product.getDiscountedPrice() != null ? product.getDiscountedPrice() : product.getSellingPrice();
+        double price = product.getEffectivePrice();
         order.setTotalAmount(price * quantity);
 
         // Create Order Item
@@ -140,7 +140,7 @@ return "Admin/Order/update_order";
         
         item.setProduct(product);
         item.setQuantity(quantity);
-        double price = product.getDiscountedPrice() != null ? product.getDiscountedPrice() : product.getSellingPrice();
+        double price = product.getEffectivePrice();
         item.setPrice(price);
         
         order.setTotalAmount(price * quantity);

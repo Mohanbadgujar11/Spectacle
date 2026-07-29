@@ -51,12 +51,7 @@ public class CheckoutController {
         }
         
         double total = cartItems.stream()
-                .mapToDouble(cartItem -> {
-                    Product product = cartItem.getProduct();
-                    int quantity = cartItem.getQuantity();
-                    double price = (product.getDiscountedPrice() != null) ? product.getDiscountedPrice() : product.getSellingPrice();
-                    return quantity * price;
-                })
+                .mapToDouble(cartItem -> cartItem.getQuantity() * cartItem.getProduct().getEffectivePrice())
                 .sum();
 
         model.addAttribute("cartItems", cartItems);
@@ -114,10 +109,9 @@ public class CheckoutController {
             item.setOrder(order);
             item.setProduct(cart.getProduct());
             item.setQuantity(cart.getQuantity());
-            double price = cart.getProduct().getDiscountedPrice() != null ? cart.getProduct().getDiscountedPrice() : cart.getProduct().getSellingPrice();
-            item.setPrice(price);
+            item.setPrice(cart.getProduct().getEffectivePrice());
             orderItems.add(item);
-            total += price * cart.getQuantity();
+            total += cart.getProduct().getEffectivePrice() * cart.getQuantity();
         }
         
         order.setTotalAmount(total);

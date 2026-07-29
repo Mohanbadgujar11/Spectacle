@@ -39,7 +39,7 @@ public class UserCartController {
                 List<Cart> items = cartRepository.findByUser(user);
                 model.addAttribute("cartItems", items);
                 double total = items.stream()
-                        .mapToDouble(i -> i.getQuantity() * (i.getProduct().getDiscountedPrice() != null ? i.getProduct().getDiscountedPrice() : i.getProduct().getSellingPrice() ))
+                        .mapToDouble(i -> i.getQuantity() * i.getProduct().getEffectivePrice())
                         .sum();
                 model.addAttribute("total", total);
             }
@@ -116,11 +116,11 @@ public class UserCartController {
              if (user != null) {
                  List<Cart> items = cartRepository.findByUser(user);
                  total = items.stream()
-                         .mapToDouble(i -> i.getQuantity() * (i.getProduct().getDiscountedPrice() != null ? i.getProduct().getDiscountedPrice() : i.getProduct().getSellingPrice() ))
+                         .mapToDouble(i -> i.getQuantity() * i.getProduct().getEffectivePrice())
                          .sum();
                  
                  if (cartItem != null) {
-                     itemTotal = cartItem.getQuantity() * (cartItem.getProduct().getDiscountedPrice() != null ? cartItem.getProduct().getDiscountedPrice() : cartItem.getProduct().getSellingPrice());
+                     itemTotal = cartItem.getQuantity() * cartItem.getProduct().getEffectivePrice();
                  }
              }
              java.util.Map<String, Object> response = new java.util.HashMap<>();
