@@ -38,7 +38,7 @@
         <h1 class="fw-bold">Admin Dashboard</h1>
         <p class="text-muted">Welcome to the administration panel.</p>
       </div>
-
+      
       <div class="row g-4 justify-content-center">
         <div class="col-12">
           <div class="card dashboard-card p-4">
@@ -46,6 +46,13 @@
               <h3 class="mb-0">Recent Contact Messages</h3>
               <a th:href="@{/admin/messages}" class="btn btn-outline-primary btn-sm">View All</a>
             </div>
+
+
+
+
+
+            
+
             <div th:if="${#lists.isEmpty(recentMessages)}" class="text-muted">No contact messages yet.</div>
             <div th:unless="${#lists.isEmpty(recentMessages)}" class="table-responsive">
               <table class="table table-hover align-middle">
@@ -137,7 +144,15 @@
       <div class="text-center mt-5">
         <a th:href="@{/}" class="btn btn-outline-secondary">Back to Main Site</a>
       </div>
-  </div>
+      <!-- Add this section to your Admin/dashboard.html file, for example, at the bottom or in a dedicated "Danger Zone" section. -->
+      <div style="border: 2px solid red; padding: 15px; margin-top: 20px; border-radius: 5px;">
+          <h4 style="color: red;">Danger Zone: Delete User Data</h4>
+          <p>This action will permanently delete all users, their associated orders, cart items, addresses, and contact messages. <strong>All product data will remain untouched.</strong> This operation cannot be undone.</p>
+          <form th:action="@{/admin/delete-all-user-data}" method="post" onsubmit="return confirm('Are you absolutely sure you want to delete ALL user-related data (users, orders, carts, addresses, messages)? This cannot be undone and products will remain.');">
+              <button type="submit" class="btn btn-danger">Delete All User Data</button>
+          </form>
+      </div>
+    </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

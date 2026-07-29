@@ -39,16 +39,18 @@ public class CheckoutController {
             // This case should not happen for an authenticated user, but as a safeguard:
             return "redirect:/login?error";
         }
+        
         // Filter out cart items with null products to prevent errors.
         // This can happen if a product was deleted but cart items remained.
         List<Cart> cartItems = cartRepository.findByUser(user).stream()
                 .filter(cartItem -> cartItem.getProduct() != null)
                 .collect(Collectors.toList());
+
         if (cartItems.isEmpty()) {
             return "redirect:/cart";
         }
         
-        double total = cartItems.stream()
+        double total = cartItems.stream() // This stream is now safe
                 .mapToDouble(i -> i.getQuantity() * (i.getProduct().getDiscountedPrice() != null ? i.getProduct().getDiscountedPrice() : i.getProduct().getSellingPrice()))
                 .sum();
 
@@ -82,7 +84,7 @@ public class CheckoutController {
             deliveryAddress = addressRepository.save(newAddress);
         }
 
-        // 2. Get Cart Items
+        // 2. Get Cart Items and ensure they have valid products
         // Filter out cart items with null products to prevent errors during order creation.
         List<Cart> cartItems = cartRepository.findByUser(user).stream()
                 .filter(cartItem -> cartItem.getProduct() != null)
