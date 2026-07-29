@@ -1,0 +1,21 @@
+# Compiled output
+target/
+
+# Log files
+*.log
+
+# IDE files
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Maven
+.mvn/

@@ -98,24 +98,12 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
-			<plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-compiler-plugin</artifactId>
     <version>3.8.1</version> <!-- Or a more recent version -->
     <configuration>
-        <source>17</source> <!-- Or your Java version -->
-        <target>17</target> <!-- Or your Java version -->
+        <source>${java.version}</source>
+        <target>${java.version}</target>
         <annotationProcessorPaths>
             <path>
                 <groupId>org.projectlombok</groupId>
@@ -124,7 +112,6 @@
             </path>
         </annotationProcessorPaths>
     </configuration>
-</plugin>
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
