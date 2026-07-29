@@ -33,4 +33,76 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Cart> cartItems;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getSmall_description() {
+        return small_description;
+    }
+
+    public void setSmall_description(String small_description) {
+        this.small_description = small_description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getSellingPrice() {
+        return sellingPrice;
+    }
+
+    public void setSellingPrice(Integer sellingPrice) {
+        this.sellingPrice = sellingPrice;
+    }
+
+    public Integer getDiscountedPrice() {
+        return discountedPrice;
+    }
+
+    public void setDiscountedPrice(Integer discountedPrice) {
+        this.discountedPrice = discountedPrice;
+    }
+
+    public byte[] getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(byte[] productImage) {
+        this.productImage = productImage;
+    }
+
+    public List<Cart> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<Cart> cartItems) {
+        this.cartItems = cartItems;
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.Spectacle_phase1.Controller;
 
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -53,13 +54,13 @@ public class AddressController {
 	}
 
 	@PostMapping("/update")
-    public String updateAddress(@ModelAttribute Address address) {
+    public String updateAddress(@ModelAttribute @NonNull Address address) {
         addressRepository.save(address);  
         return "redirect:/admin/addresses";  
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteAddress(@PathVariable Long id) {
+    public String deleteAddress(@PathVariable @NonNull Long id) {
         addressRepository.deleteById(id);  
         return "redirect:/admin/addresses";  
     }

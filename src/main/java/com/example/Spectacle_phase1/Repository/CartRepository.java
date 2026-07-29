@@ -11,6 +11,8 @@ public interface CartRepository extends JpaRepository <Cart,Long>{
     // find all cart items belonging to a specific user
     java.util.List<Cart> findByUser(com.example.Spectacle_phase1.Model.User user);
 
+    java.util.List<Cart> findByUserIn(java.util.List<com.example.Spectacle_phase1.Model.User> users);
+
     // find cart entry for a user+product combo (useful for incrementing quantity)
     java.util.Optional<Cart> findByUserAndProduct(com.example.Spectacle_phase1.Model.User user, com.example.Spectacle_phase1.Model.Product product);
 
