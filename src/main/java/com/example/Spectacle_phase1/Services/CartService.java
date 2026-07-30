@@ -34,6 +34,11 @@ public class CartService {
     public double getCartTotal(List<Cart> cartItems) {
         return cartItems.stream()
                 .mapToDouble(item -> {
+                    // Defensive check: If a product associated with a cart item was deleted,
+                    // item.getProduct() will be null. We should treat its contribution to the total as 0.
+                    if (item.getProduct() == null) {
+                        return 0.0;
+                    }
                     int quantity = item.getQuantity() != null ? item.getQuantity() : 0;
                     return quantity * item.getProduct().getEffectivePrice();
                 })
