@@ -53,7 +53,10 @@ public class UserController {
         User existingUser = userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User not found"));
         existingUser.setUsername(user.getUsername());
         existingUser.setEmail(user.getEmail());
-        existingUser.setRole(user.getRole()); // Assuming role can be updated
+        // Only update the role if a new one is provided and not blank.
+        if (user.getRole() != null && !user.getRole().isBlank()) {
+            existingUser.setRole(user.getRole());
+        }
         if (newPassword != null && !newPassword.isBlank()) {
             existingUser.setPassword(passwordEncoder.encode(newPassword));
         }
