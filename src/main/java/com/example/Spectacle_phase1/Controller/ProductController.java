@@ -61,17 +61,29 @@ public class ProductController {
     }
 
     @PostMapping("/update")
-    public String updateproduct(@ModelAttribute Product product,
+    @Transactional
+    public String updateproduct(@ModelAttribute Product productFromForm,
             @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
 
+        // 1. Fetch the existing product from the database.
+        Product existingProduct = productRepository.findById(productFromForm.getId())
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productFromForm.getId()));
+
+        // 2. Update the fields of the existing product with data from the form.
+        existingProduct.setName(productFromForm.getName());
+        existingProduct.setCategory(productFromForm.getCategory());
+        existingProduct.setSmall_description(productFromForm.getSmall_description());
+        existingProduct.setDescription(productFromForm.getDescription());
+        existingProduct.setSellingPrice(productFromForm.getSellingPrice());
+        existingProduct.setDiscountedPrice(productFromForm.getDiscountedPrice());
+
+        // 3. Handle the image file separately.
         if (!imageFile.isEmpty()) {
-            product.setProductImage(imageFile.getBytes());
-        } else {
-            Product existingProduct = productRepository.findById(product.getId()).orElse(new Product());
-            product.setProductImage(existingProduct.getProductImage());
+            existingProduct.setProductImage(imageFile.getBytes());
         }
 
-        productRepository.save(product);
+        // 4. Save the updated existing product.
+        productRepository.save(existingProduct);
         return "redirect:/admin/products";
     }
 
@@ -82,6 +94,7 @@ public class ProductController {
             // Before deleting the product, we must delete all associated Cart items
             // to maintain data integrity and prevent checkout errors.
             // NOTE: This requires `List<Cart> findByProduct(Product product);` in your CartRepository.
+            // Ensure findByProduct is implemented in CartRepository
             cartRepository.deleteAll(cartRepository.findByProduct(product));
 
             productRepository.delete(product);

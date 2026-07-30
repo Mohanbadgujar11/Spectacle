@@ -96,6 +96,7 @@ public class OrderController {
 
     // Show Update Order Form
     @GetMapping("/update/{id}")
+    @Transactional(readOnly = true) // Add this annotation
     public String updateOrderForm(@PathVariable Long id, Model model) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
         
@@ -115,6 +116,7 @@ return "Admin/Order/update_order";
 
     // Handle Update Order Submission
     @PostMapping("/update")
+    @Transactional // Add this annotation to keep the session open
     public String updateOrder(@RequestParam Long id,
                               @RequestParam Long productId,
                               @RequestParam Long addressId,
@@ -150,8 +152,8 @@ return "Admin/Order/update_order";
         return "redirect:/admin/orders";
     }
 
-    // Delete Order
-    @GetMapping("/delete/{id}")
+    // Delete Order (Changed to POST for better practice)
+    @PostMapping("/delete/{id}")
     public String deleteOrder(@PathVariable Long id) {
         orderRepository.deleteById(id);
         return "redirect:/admin/orders";

@@ -53,8 +53,8 @@ public class CartController {
         return "redirect:/admin/cart";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteCartItem(@PathVariable Long id) {
+    @PostMapping("/delete/{id}") // Changed to POST for security
+    public String deleteCartItem(@PathVariable Long id, @RequestParam(value = "_csrf", required = false) String csrf) {
         cartRepository.deleteById(id);
         return "redirect:/admin/cart";
     }

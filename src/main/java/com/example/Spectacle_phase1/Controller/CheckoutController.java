@@ -77,12 +77,21 @@ public class CheckoutController {
         
         // 1. Resolve Address
         Address deliveryAddress;
-        if (addressId != null) {
-            deliveryAddress = addressRepository.findById(addressId).orElse(null);
-        } else {
+        // Check if an existing address was selected
+        if (addressId != null && addressId > 0) {
+            deliveryAddress = addressRepository.findById(addressId)
+                .filter(addr -> addr.getUser().equals(user)) // Ensure the address belongs to the user
+                .orElse(null);
+        // If not, check if a new address was submitted with content
+        } else if (newAddress != null && newAddress.getName() != null && !newAddress.getName().isBlank()) {
             newAddress.setUser(user);
             deliveryAddress = addressRepository.save(newAddress);
+        } else {
+            // No address was selected or provided, this is an error.
+            return "redirect:/checkout?error=NoAddress";
         }
+
+        if (deliveryAddress == null) return "redirect:/checkout?error=InvalidAddress";
 
         // 2. Get Cart Items and ensure they have valid products
         // Filter out cart items with null products to prevent errors during order creation.
@@ -134,8 +143,11 @@ public class CheckoutController {
         User user = userRepository.findByUsername(auth.getName()).orElse(null);
         List<Order> orders = orderRepository.findByUserOrderByOrderDateDesc(user);
         // Eagerly fetch OrderItems to prevent LazyInitializationException in the template.
-        // This ensures the data is loaded before the transaction closes.
-        orders.forEach(order -> order.getOrderItems().size());
+        // Also, ensure that related entities are not null before accessing them.
+        orders.forEach(order -> {
+            if (order.getOrderItems() != null) order.getOrderItems().size();
+            if (order.getAddress() != null) order.getAddress().getCity(); // Example access
+        });
         model.addAttribute("orders", orders);
         return "order";
     }

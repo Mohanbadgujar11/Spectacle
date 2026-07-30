@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.Spectacle_phase1.Model.Address;
+import com.example.Spectacle_phase1.Model.Order;
 import com.example.Spectacle_phase1.Repository.AddressRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +20,12 @@ public class AddressController {
 
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
+    private final com.example.Spectacle_phase1.Repository.OrderRepository orderRepository;
 
-    public AddressController(AddressRepository addressRepository, UserRepository userRepository) {
+    public AddressController(AddressRepository addressRepository, UserRepository userRepository, com.example.Spectacle_phase1.Repository.OrderRepository orderRepository) {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     @GetMapping
@@ -44,6 +47,12 @@ public class AddressController {
 		return "Admin/Address/add_address";  
 	}
 
+    @PostMapping("/add")
+    public String addAddress(@ModelAttribute Address address) {
+        addressRepository.save(address);
+        return "redirect:/admin/addresses";
+    }
+
 	@GetMapping("/update/{id}")
 	public String updateAddressForm(@PathVariable Long id, Model model) {
 		Address address = addressRepository.findById(id).orElse(new Address());
@@ -59,9 +68,19 @@ public class AddressController {
         return "redirect:/admin/addresses";  
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteAddress(@PathVariable @NonNull Long id) {
-        addressRepository.deleteById(id);  
+    @PostMapping("/delete/{id}")
+    @Transactional
+    public String deleteAddress(@PathVariable Long id) {
+        Address addressToDelete = addressRepository.findById(id).orElse(null);
+        if (addressToDelete != null) {
+            // Find all orders associated with this address
+            List<Order> orders = orderRepository.findByAddress(addressToDelete);
+            // Set the address to null for each order to break the link
+            orders.forEach(order -> order.setAddress(null));
+            orderRepository.saveAll(orders);
+            // Now it's safe to delete the address
+            addressRepository.delete(addressToDelete);
+        }
         return "redirect:/admin/addresses";  
     }
 }
