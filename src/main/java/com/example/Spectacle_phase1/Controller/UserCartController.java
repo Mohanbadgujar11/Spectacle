@@ -11,6 +11,9 @@ import com.example.Spectacle_phase1.Model.User;
 import com.example.Spectacle_phase1.Repository.CartRepository;
 import com.example.Spectacle_phase1.Repository.ProductRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
+import com.example.Spectacle_phase1.Services.CartService;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,33 +21,24 @@ import java.util.List;
 @RequestMapping("/cart")
 public class UserCartController {
 
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CartService cartService;
 
-    public UserCartController(CartRepository cartRepository,
-                              ProductRepository productRepository,
-                              UserRepository userRepository) {
-        this.cartRepository = cartRepository;
-        this.productRepository = productRepository;
+    public UserCartController(UserRepository userRepository, CartService cartService) {
         this.userRepository = userRepository;
+        this.cartService = cartService;
     }
 
     // show current user's cart items (or provide empty model for guests)
     @GetMapping
+    @Transactional(readOnly = true)
     public String viewCart(Model model, Authentication auth) {
         if (auth != null && auth.isAuthenticated()) {
             User user = userRepository.findByUsername(auth.getName()).orElse(null);
             if (user != null) {
-                List<Cart> items = cartRepository.findByUser(user);
+                List<Cart> items = cartService.getCartItems(user);
                 model.addAttribute("cartItems", items);
-                double total = items.stream()
-                        .mapToDouble(i -> {
-                            int quantity = i.getQuantity() != null ? i.getQuantity() : 0;
-                            return quantity * i.getProduct().getEffectivePrice();
-                        })
-                        .sum();
-                model.addAttribute("total", total);
+                model.addAttribute("total", cartService.getCartTotal(items));
             }
         }
         // make sure attributes exist even if user is anonymous or nothing found
@@ -57,6 +51,7 @@ public class UserCartController {
 
     // add a product to the logged-in user's cart (increase quantity if already present)
     @PostMapping("/add/{productId}")
+    @ResponseBody
     public org.springframework.http.ResponseEntity<Integer> addToCart(@PathVariable Long productId,
                                                                     Authentication auth,
                                                                     jakarta.servlet.http.HttpServletRequest request) {
@@ -65,36 +60,22 @@ public class UserCartController {
             return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
         }
         User user = userRepository.findByUsername(auth.getName()).orElse(null);
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
-                    .location(java.net.URI.create("/")).build(); // product not found
+
+        try {
+            int newCartSize = cartService.addProductToCart(user, productId);
+            return org.springframework.http.ResponseEntity.ok(newCartSize);
+        } catch (IllegalArgumentException e) {
+            // Product not found
+            return org.springframework.http.ResponseEntity.notFound().build();
         }
-        
-        Cart cartItem = cartRepository.findByUserAndProduct(user, product).orElse(null);
-        if (cartItem == null) {
-            cartItem = new Cart();
-            cartItem.setUser(user);
-            cartItem.setProduct(product);
-            cartItem.setQuantity(1);
-        } else {
-            cartItem.setQuantity((cartItem.getQuantity() == null ? 0 : cartItem.getQuantity()) + 1);
-        }
-        cartRepository.save(cartItem);
-        // if AJAX request, respond with new cart size
-        if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-            return org.springframework.http.ResponseEntity.ok(cartRepository.findByUser(user).size());
-        }
-        // otherwise redirect to cart page
-        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
-                .location(java.net.URI.create("/cart")).build();
     }
 
     // remove an item from cart
     @PostMapping("/remove/{cartId}")
     public String removeFromCart(@PathVariable Long cartId, Authentication auth) {
         // optional: verify that the cart item belongs to current user
-        cartRepository.deleteById(cartId);
+        // A more robust implementation would use the service and check ownership
+        cartService.removeCartItem(cartId);
         return "redirect:/cart";
     }
 
@@ -105,38 +86,19 @@ public class UserCartController {
                                  @RequestParam Integer quantity,
                                  Authentication auth,
                                  jakarta.servlet.http.HttpServletRequest request) {
-        
-        Cart cartItem = cartRepository.findById(cartId).orElse(null);
-        if (cartItem != null) {
-            cartItem.setQuantity(quantity);
-            cartRepository.save(cartItem);
+
+        if (auth == null || !auth.isAuthenticated()) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
         }
 
-        if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-             User user = userRepository.findByUsername(auth.getName()).orElse(null);
-             double total = 0;
-             double itemTotal = 0;
-             if (user != null) {
-                 List<Cart> items = cartRepository.findByUser(user);
-                 total = items.stream()
-                         .mapToDouble(i -> {
-                             int q = i.getQuantity() != null ? i.getQuantity() : 0;
-                             return q * i.getProduct().getEffectivePrice();
-                         })
-                         .sum();
-                 
-                 if (cartItem != null) {
-                     int q = cartItem.getQuantity() != null ? cartItem.getQuantity() : 0;
-                     itemTotal = q * cartItem.getProduct().getEffectivePrice();
-                 }
-             }
-             java.util.Map<String, Object> response = new java.util.HashMap<>();
-             response.put("total", total);
-             response.put("itemTotal", itemTotal);
-             return org.springframework.http.ResponseEntity.ok(response);
-        }
+        User user = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
 
-        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
-                .location(java.net.URI.create("/cart")).build();
+        try {
+            java.util.Map<String, Object> response = cartService.updateCartItemQuantity(user, cartId, quantity);
+            return org.springframework.http.ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return org.springframework.http.ResponseEntity.notFound().build();
+        }
     }
 }

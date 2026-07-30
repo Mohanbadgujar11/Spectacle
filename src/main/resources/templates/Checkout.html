@@ -8,115 +8,161 @@
   <title>Checkout - Spectacle</title>
   <th:block layout:fragment="styles">
     <link rel="stylesheet" th:href="@{/css/products.css}" />
+    <style>
+      .form-control:focus, .form-select:focus {
+        border-color: #f39c9c;
+        box-shadow: 0 0 0 0.25rem rgba(243, 156, 156, 0.3);
+      }
+      .address-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+      }
+      .address-card:hover {
+        border-color: #f39c9c;
+        background-color: #fef6f6;
+      }
+      .address-card.selected {
+        border-color: #f39c9c;
+        background-color: #fef6f6;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      .order-summary {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .btn-primary {
+        background-color: #f39c9c;
+        border-color: #f39c9c;
+      }
+      .btn-primary:hover {
+        background-color: #e88383;
+        border-color: #e88383;
+      }
+    </style>
   </th:block>
 </head>
 
 <body>
   <div layout:fragment="content">
     <main class="container my-5">
+      <div class="text-center mb-5">
+        <h1 class="fw-bold">Checkout</h1>
+        <p class="text-muted">Complete your order by providing the details below.</p>
+      </div>
+
       <div class="row">
         <!-- Checkout form & address selection -->
-        <div class="col-md-8">
-          <h4 class="mb-3"><b>Delivery Address</b></h4>
-          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div class="col-lg-7">
           <form th:action="@{/checkout}" method="post" id="checkoutForm">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            
+            <!-- Flash error message -->
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+            <h4 class="mb-3">Delivery Address</h4>
+
+            <!-- Saved Addresses -->
             <div th:if="${addresses.size() > 0}">
-              <div class="mb-3">
-                <p>Select one of your saved addresses:</p>
-                <div th:each="addr : ${addresses}" class="form-check">
-                  <input class="form-check-input" type="radio" name="addressId" th:value="${addr.id}" id="addr-[[${addr.id}]]" />
-                  <label class="form-check-label" th:for="${'addr-' + addr.id}">
-                    <span th:text="${addr.fullAddress}"></span>
+              <p class="text-muted">Select one of your saved addresses or add a new one.</p>
+              <div class="row">
+                <div th:each="addr : ${addresses}" class="col-md-6">
+                  <label class="address-card w-100" th:for="${'addr-' + addr.id}">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="addressId" th:value="${addr.id}" th:id="${'addr-' + addr.id}" />
+                      <div class="ms-2">
+                        <strong th:text="${addr.name}"></strong><br>
+                        <span th:text="${addr.area}"></span><br>
+                        <span th:text="${addr.city + ', ' + addr.state + ' - ' + addr.pincode}"></span>
+                      </div>
+                    </div>
                   </label>
                 </div>
               </div>
             </div>
 
-            <hr />
-            <div>
-              <h5>Add a new address</h5>
+            <hr class="my-4" />
+
+            <!-- New Address Form -->
+            <h5 class="mb-3">Or Add a New Address</h5>
+            <div th:object="${newAddress}">
               <div class="row g-3">
                 <div class="col-sm-6">
-                  <label class="form-label">Name</label>
-                  <input type="text" name="name" class="form-control" th:value="${newAddress.name}" />
+                  <label for="name" class="form-label">Full Name</label>
+                  <input type="text" id="name" name="name" class="form-control" th:field="*{name}" />
                 </div>
                 <div class="col-12">
-                  <label class="form-label">Area / Street</label>
-                  <input type="text" name="area" class="form-control" th:value="${newAddress.area}" />
+                  <label for="area" class="form-label">Area / Street</label>
+                  <input type="text" id="area" name="area" class="form-control" th:field="*{area}" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">City</label>
-                  <input type="text" name="city" class="form-control" th:value="${newAddress.city}" />
+                  <label for="city" class="form-label">City</label>
+                  <input type="text" id="city" name="city" class="form-control" th:field="*{city}" />
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">State</label>
-                  <input type="text" name="state" class="form-control" th:value="${newAddress.state}" />
+                  <label for="state" class="form-label">State</label>
+                  <input type="text" id="state" name="state" class="form-control" th:field="*{state}" />
                 </div>
                 <div class="col-md-2">
-                  <label class="form-label">Pincode</label>
-                  <input type="number" name="pincode" class="form-control" th:value="${newAddress.pincode}" />
+                  <label for="pincode" class="form-label">Pincode</label>
+                  <input type="number" id="pincode" name="pincode" class="form-control" th:field="*{pincode}" />
                 </div>
               </div>
             </div>
 
             <hr class="my-4" />
 
-            <h4 class="mb-3">Payment</h4>
-
+            <!-- Payment Method -->
+            <h4 class="mb-3">Payment Method</h4>
             <div class="my-3">
               <div class="form-check">
-                <input id="upi" name="paymentMethod" type="radio" class="form-check-input" checked required />
-                <label class="form-check-label" for="upi">Cash on Delivery</label>
+                <input id="cod" name="paymentMethod" value="COD" type="radio" class="form-check-input" checked required />
+                <label class="form-check-label" for="cod">Cash on Delivery</label>
               </div>
             </div>
 
-            <!-- <div class="row gy-3">
-              <div class="col-md-12">
-                <label for="upi-app" class="form-label">Select UPI App</label>
-                <select class="form-select" id="upi-app">
-                  <option value="upi">Generic UPI (Any App)</option>
-                  <option value="tez">Google Pay</option>
-                  <option value="phonepe">PhonePe</option>
-                  <option value="paytmmp">Paytm</option>
-                </select>
-                <small class="text-muted">You will be redirected to the selected app to complete the payment.</small>
-              </div>
-            </div> -->
-
             <hr class="my-4" />
 
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Place Order</button>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Place Order & Pay</button>
           </form>
         </div>
 
         <!-- Order Summary -->
-        <div class="col-md-4">
-          <h4 class="d-flex justify-content-between align-items-center mb-3">
-            <span class="text-primary" style="color: #f39c9c !important">Your cart</span>
-            <span class="badge bg-primary rounded-pill" style="background-color: #f39c9c !important" th:text="${cartItems.size()}">0</span>
-          </h4>
-          <ul class="list-group mb-3">
-            <li class="list-group-item" th:each="item : ${cartItems}">
-              <div class="d-flex justify-content-between">
+        <div class="col-lg-5">
+          <div class="order-summary">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+              <span>Order Summary</span>
+              <span class="badge rounded-pill" style="background-color: #f39c9c;" th:text="${cartItems.size()}">0</span>
+            </h4>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between lh-sm" th:each="item : ${cartItems}" style="background: transparent;">
                 <div>
                   <h6 class="my-0" th:text="${item.product.name}"></h6>
-                  <small class="text-muted" th:text="${item.product.category}"></small>
+                  <small class="text-muted" th:text="'Qty: ' + ${item.quantity}"></small>
                 </div>
-                <span class="text-muted">₹<span th:text="${item.quantity * (item.product.discountedPrice != null ? item.product.discountedPrice : item.product.sellingPrice)}"></span></span>
-              </div>
-            </li>
-            <li class="list-group-item d-flex justify-content-between">
-              <span>Total (INR)</span>
-              <strong>₹<span th:text="${total}"></span></strong>
-            </li>
-          </ul>
+                <span class="text-muted">₹<span th:text="${#numbers.formatDecimal(item.quantity * item.product.effectivePrice, 1, 2)}"></span></span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between" style="background: transparent;">
+                <span>Total (INR)</span>
+                <strong>₹<span th:text="${#numbers.formatDecimal(total, 1, 2)}"></span></strong>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </main>
     <script>
-      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-        alert("Your order has been placed successfully!");
+      document.querySelectorAll('input[name="addressId"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
+          if (this.checked) {
+            this.closest('.address-card').classList.add('selected');
+          }
+        });
       });
     </script>
   </div>

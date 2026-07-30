@@ -2,10 +2,13 @@ package com.example.Spectacle_phase1.Controller;
 
 import com.example.Spectacle_phase1.Model.*;
 import com.example.Spectacle_phase1.Repository.*;
+import com.example.Spectacle_phase1.Services.CheckoutService;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -20,12 +23,14 @@ public class CheckoutController {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepository;
+    private final CheckoutService checkoutService;
 
-    public CheckoutController(CartRepository cartRepository, UserRepository userRepository, OrderRepository orderRepository, AddressRepository addressRepository) {
+    public CheckoutController(CartRepository cartRepository, UserRepository userRepository, OrderRepository orderRepository, AddressRepository addressRepository, CheckoutService checkoutService) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.addressRepository = addressRepository;
+        this.checkoutService = checkoutService;
     }
 
     @GetMapping("/checkout")
@@ -69,73 +74,21 @@ public class CheckoutController {
     public String placeOrder(@RequestParam(required = false) Long addressId,
                              @ModelAttribute Address newAddress,
                              @RequestParam String paymentMethod,
-                             Authentication auth) {
+                             Authentication auth,
+                             RedirectAttributes redirectAttributes) {
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/login";
         }
-        User user = userRepository.findByUsername(auth.getName()).orElse(null);
-        if (user == null) {
-            return "redirect:/login?error";
+        User user = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
+
+        try {
+            Order order = checkoutService.placeOrder(user, addressId, newAddress, paymentMethod);
+            return "redirect:/order-confirmation/" + order.getId();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/checkout";
         }
-        
-        // 1. Resolve Address
-        Address deliveryAddress;
-        // Check if an existing address was selected
-        if (addressId != null && addressId > 0) {
-            deliveryAddress = addressRepository.findById(addressId)
-                .filter(addr -> addr.getUser().equals(user)) // Ensure the address belongs to the user
-                .orElse(null);
-        // If not, check if a new address was submitted with content
-        } else if (newAddress != null && newAddress.getName() != null && !newAddress.getName().isBlank()) {
-            newAddress.setUser(user);
-            deliveryAddress = addressRepository.save(newAddress);
-        } else {
-            // No address was selected or provided, this is an error.
-            return "redirect:/checkout?error=NoAddress";
-        }
-
-        if (deliveryAddress == null) return "redirect:/checkout?error=InvalidAddress";
-
-        // 2. Get Cart Items and ensure they have valid products
-        // Filter out cart items with null products to prevent errors during order creation.
-        List<Cart> cartItems = cartRepository.findByUser(user).stream()
-                .filter(cartItem -> cartItem.getProduct() != null)
-                .collect(Collectors.toList());
-        if (cartItems.isEmpty()) {
-            return "redirect:/cart";
-        }
-
-        // 3. Create Order
-        Order order = new Order();
-        order.setUser(user);
-        order.setAddress(deliveryAddress);
-        order.setPaymentMethod(paymentMethod);
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus("Placed");
-
-        double total = 0;
-        List<OrderItem> orderItems = new ArrayList<>();
-        
-        for (Cart cart : cartItems) {
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setProduct(cart.getProduct());
-            int quantity = cart.getQuantity() != null ? cart.getQuantity() : 0;
-            item.setQuantity(quantity);
-            item.setPrice(cart.getProduct().getEffectivePrice());
-            orderItems.add(item);
-            total += cart.getProduct().getEffectivePrice() * quantity;
-        }
-        
-        order.setTotalAmount(total);
-        order.setOrderItems(orderItems);
-        
-        orderRepository.save(order);
-
-        // 4. Clear Cart
-        cartRepository.deleteAll(cartItems);
-
-        return "redirect:/orders";
     }
 
     @GetMapping("/orders")
@@ -154,5 +107,24 @@ public class CheckoutController {
         });
         model.addAttribute("orders", orders);
         return "order";
+    }
+
+    @GetMapping("/order-confirmation/{orderId}")
+    public String orderConfirmation(@PathVariable Long orderId, Model model, Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        User user = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
+
+        Order order = orderRepository.findById(orderId)
+                .filter(o -> o.getUser().equals(user)) // Security check
+                .orElse(null);
+
+        if (order == null) {
+            return "redirect:/orders"; // Or show an error page
+        }
+        model.addAttribute("order", order);
+        return "order-confirmation";
     }
 }

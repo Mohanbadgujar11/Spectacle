@@ -14,13 +14,13 @@
 
     <div layout:fragment="content">
 
-      <div th:insert="fragments/header :: header"></div>
+      <div th:replace="~{fragments/header :: header}"></div>
 
-      <div th:insert="categories :: categories"></div>
+<div th:replace="~{categories :: categories}"></div>
 
-      <div th:insert="fragments/banner :: banner"></div>
+<div th:replace="~{fragments/banner :: banner}"></div>
 
-      <div th:insert="carousel :: carousel"></div>
+<div th:replace="~{carousel :: carousel}"></div>
     </div>
     
   </body>
