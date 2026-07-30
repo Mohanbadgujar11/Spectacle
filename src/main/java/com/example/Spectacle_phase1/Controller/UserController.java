@@ -1,6 +1,9 @@
 package com.example.Spectacle_phase1.Controller;
 
 import com.example.Spectacle_phase1.Model.User;
+import com.example.Spectacle_phase1.Repository.AddressRepository;
+import com.example.Spectacle_phase1.Repository.CartRepository;
+import com.example.Spectacle_phase1.Repository.OrderRepository;
 import com.example.Spectacle_phase1.Repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -8,16 +11,24 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/admin/users")
 public class UserController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder; // Assuming you have a PasswordEncoder bean configured
+    private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
+    private final CartRepository cartRepository;
 
-    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder, OrderRepository orderRepository, AddressRepository addressRepository, CartRepository cartRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.orderRepository = orderRepository;
+        this.addressRepository = addressRepository;
+        this.cartRepository = cartRepository;
     }
 
     @GetMapping
@@ -67,7 +78,17 @@ public class UserController {
     @PostMapping("/delete/{id}") // Changed to POST for better practice
     @Transactional
     public String deleteUser(@PathVariable Long id) {
-        userRepository.deleteById(id);
+        userRepository.findById(id).ifPresent(user -> {
+            // The deletion order is critical to avoid foreign key constraint violations.
+            // 1. Delete Orders associated with the user.
+            orderRepository.deleteAll(orderRepository.findByUserOrderByOrderDateDesc(user));
+            // 2. Delete Cart items associated with the user.
+            cartRepository.deleteAll(cartRepository.findByUser(user));
+            // 3. Delete Addresses associated with the user.
+            addressRepository.deleteAll(addressRepository.findByUser(user));
+            // 4. Now it's safe to delete the user.
+            userRepository.delete(user);
+        });
         return "redirect:/admin/users";
     }
 }
